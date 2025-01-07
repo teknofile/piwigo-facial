@@ -6,12 +6,15 @@
   }
 {/html_style}
 
-<div class="titlePage">
+
+<div class="titrePage">
 	<h2>Facial</h2>
 </div>
+
 <form method="post" action="" class="properties">
 <fieldset>
-  <legend>{'What Facial Can Do For Me?'|translate}</legend>
+  <legend>{'What Facial can do for me?'|translate}</legend>
   {$INTRO_CONTENT}
 </fieldset>
+
 </form>

@@ -1,10 +1,14 @@
 <?php
 defined('FACIAL_PATH') or die('Hacking attempt!');
 
-// send variable to template
+// +-----------------------------------------------------------------------+
+// | Home tab                                                              |
+// +-----------------------------------------------------------------------+
+
+// send variables to template
 $template->assign(array(
-	'facial' => $conf['facial'],
-	'INTRO_CONTENT' => load_language('intro.html', FACIAL_PATH, array('return'=>true)),
+  'facial' => $conf['facial'],
+  'INTRO_CONTENT' => load_language('intro.html', FACIAL_PATH, array('return'=>true)),
   ));
 
 // define template file
