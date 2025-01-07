@@ -1,16 +1,26 @@
 <?php
+
 defined('PHPWG_ROOT_PATH') or die('Hacking attempt!');
+
+/*
+ * Plugin Constants
+ */
+defined('FACIAL_ID') or define('FACIAL_ID',      basename(dirname(__FILE__)));
+defined('FACIAL_PATH') or define('FACIAL_PATH' ,   PHPWG_PLUGINS_PATH . FACIAL_ID . '/');
+
+/*
+ * Include custom helper functions
+ */
+include_once(FACIAL_PATH . 'include/helpers.php');
 
 /**
  * This class is used to expose maintenance methods to the plugins manager
  * It must extends PluginMaintain and be named "PLUGINID_maintain"
- * where PLUGINID is the directory name of your plugin.
+ * where PLUGINID is the directory name of your plugin
  */
-class facial_maintain extends PluginMaintain
+class Facial_maintain extends PluginMaintain
 {
   private $default_conf = array(
-    'compreface_api_url' => 'https://hostname:8000/v1/api/',
-    'compreface_api_key' => 'ABCDEF-12345',
     'option1' => 10,
     'option2' => true,
     'option3' => 'two',
@@ -44,28 +54,24 @@ class facial_maintain extends PluginMaintain
     if (empty($conf['facial']))
     {
       // conf_update_param well serialize and escape array before database insertion
-      // the third parameter indicates to update $conf['facial'] global variable as well
+      // the third parameter indicates to update $conf['skeleton'] global variable as well
       conf_update_param('facial', $this->default_conf, true);
     }
     else
     {
       $old_conf = safe_unserialize($conf['facial']);
 
-      if (empty($old_conf['compreface_api_url']))
+      if (empty($old_conf['option3']))
       { // use case: this parameter was added in a new version
-        $old_conf['compreface_api_url'] = 'https://example:8080/';
+        $old_conf['option3'] = 'two';
       }
 
-      if (empty($old_conf['compreface_api_key']))
-      {
-	$old_conf['compreface_api_key'] = '123456789';
-      }
-
-      conf_update_param('facial', $old_conf, true);
+      conf_update_param('skeleton', $old_conf, true);
     }
 
     // add a new table
-    pwg_query('CREATE TABLE IF NOT EXISTS `'. $this->table .'` (
+    pwg_query('
+CREATE TABLE IF NOT EXISTS `'. $this->table .'` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `field1` mediumint(8) DEFAULT NULL,
   `field2` varchar(64) NOT NULL,
@@ -78,6 +84,13 @@ class facial_maintain extends PluginMaintain
     if (!pwg_db_num_rows($result))
     {
       pwg_query('ALTER TABLE `' . IMAGES_TABLE . '` ADD `facial` TINYINT(1) NOT NULL DEFAULT 0;');
+    }
+
+    // add a new column to existing table (for users modal)
+    $result = pwg_query('SHOW COLUMNS FROM `'.USER_INFOS_TABLE.'` LIKE "facial_notes";');
+    if (!pwg_db_num_rows($result))
+    {
+      pwg_query('ALTER TABLE `' . USER_INFOS_TABLE . '` ADD `facial_notes` VARCHAR(255) DEFAULT NULL;');
     }
 
     // create a local directory
@@ -136,6 +149,7 @@ class facial_maintain extends PluginMaintain
 
     // delete field
     pwg_query('ALTER TABLE `'. IMAGES_TABLE .'` DROP `facial`;');
+    pwg_query('ALTER TABLE `'. USER_INFOS_TABLE .'` DROP `facial_notes`;');
 
     // delete local folder
     // use a recursive function if you plan to have nested directories
